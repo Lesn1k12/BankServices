@@ -26,28 +26,28 @@ CFLAGS = None
 curve25519.c
 aes_nohw.c
 montgomery.c
-ecp_nistz.c
 montgomery_inv.c
+ecp_nistz.c
 gfp_p256.c
-p256.c
 gfp_p384.c
+p256.c
 limbs.c
 mem.c
 poly1305.c
 crypto.c
-exit code: 0
-exit code: 0
-exit code: 0
-exit code: 0
-exit code: 0
-exit code: 0
-exit code: 0
-exit code: 0
-exit code: 0
 cpu_intel.c
 curve25519_64_adx.c
 poly1305_vec.c
 p256-nistz.c
+exit code: 0
+exit code: 0
+exit code: 0
+exit code: 0
+exit code: 0
+exit code: 0
+exit code: 0
+exit code: 0
+exit code: 0
 exit code: 0
 exit code: 0
 exit code: 0
@@ -81,7 +81,7 @@ cargo:rerun-if-env-changed=CFLAGS
 CFLAGS = None
 constant_time_test.c
 cargo:rustc-link-lib=static=ring_core_0_17_8_test
-cargo:rustc-link-search=native=C:\Users\Admin\Desktop\ActixProj\api\target\debug\build\ring-788433181e9fba9c\out
+cargo:rustc-link-search=native=C:\Users\Admin\Desktop\BankServices\api\target\debug\build\ring-788433181e9fba9c\out
 cargo:rerun-if-changed=crypto\chacha\asm\chacha-armv4.pl
 cargo:rerun-if-changed=crypto\chacha\asm\chacha-armv8.pl
 cargo:rerun-if-changed=crypto\chacha\asm\chacha-x86.pl
