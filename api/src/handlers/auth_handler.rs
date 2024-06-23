@@ -29,3 +29,22 @@ pub async fn login(client: web::Data<Client>, login_req: web::Json<LoginRequest>
         Err(_) => HttpResponse::InternalServerError().finish(),
     }
 }
+
+pub async fn register(client: web::Data<Client>, register_req: web::Json<LoginRequest>) -> impl Responder {
+    let auth_service_url = env::var("AUTH_URL").expect("AUTH_URL must be set");
+    let url = format!("{}/register", auth_service_url);
+
+    let res = client.post(&url)
+        .json(&*register_req)
+        .send()
+        .await;
+
+    match res {
+        Ok(response) => {
+            let status = response.status();
+            let body = response.text().await.unwrap_or_default();
+            HttpResponse::build(StatusCode::from_u16(status.as_u16()).unwrap()).body(body)
+        },
+        Err(_) => HttpResponse::InternalServerError().finish(),
+    }
+}

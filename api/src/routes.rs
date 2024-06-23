@@ -10,5 +10,9 @@ pub fn init(cfg: &mut web::ServiceConfig) {
                 web::resource("/login")
                     .route(web::post().to(auth_handler::login))
             )
+            .service(
+                web::resource("/register")
+                    .route(web::post().to(auth_handler::register))
+            )
     );
 }
