@@ -1,8 +1,8 @@
-use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 use diesel::prelude::*;
-use diesel::sql_types::Timestamp;
 use crate::schema::users;
+use diesel::pg::Pg;
+use jsonwebtoken::{EncodingKey, DecodingKey};
 
 #[derive(Queryable, Selectable, Serialize, Deserialize)]
 #[diesel(table_name = users)]
@@ -12,11 +12,9 @@ pub struct User {
     pub username: String,
     pub password: String,
     pub role: String,
-    #[diesel(sql_type = Timestamp)]
-    pub created_at: NaiveDateTime,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LoginUser {
     pub username: String,
     pub password: String,
@@ -28,7 +26,7 @@ pub struct AuthResponse {
     pub expires_in: u64,
 }
 
-#[derive(Insertable, Serialize, Deserialize)]
+#[derive(Debug, Insertable, Serialize, Deserialize)]
 #[diesel(table_name = users)]
 pub struct NewUser {
     pub username: String,
@@ -40,4 +38,15 @@ pub struct NewUser {
 pub struct Claims {
     pub sub: String,
     pub exp: usize,
+}
+
+impl Claims {
+    pub fn encode(&self, secret: &[u8]) -> String {
+        jsonwebtoken::encode(&jsonwebtoken::Header::default(), self, &EncodingKey::from_secret(secret)).unwrap()
+    }
+
+    pub fn decode(token: &str, secret: &[u8]) -> Result<Self, jsonwebtoken::errors::Error> {
+        jsonwebtoken::decode::<Claims>(token, &DecodingKey::from_secret(secret), &jsonwebtoken::Validation::default())
+            .map(|data| data.claims)
+    }
 }
