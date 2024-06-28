@@ -56,7 +56,7 @@ async fn main() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub async fn create_pool() -> anyhow::Result<Pool<Postgres>> {
+async fn create_pool() -> anyhow::Result<Pool<Postgres>> {
     PgPool::connect(DB_ADDRESS).await.map_err(|e| {
         log::error!("Error to connect db! -> {}", e);
         anyhow::anyhow!("Error to connect db! -> {}", e)
