@@ -1,0 +1,124 @@
+pub async fn login(
+    login_req: web::Json<LoginUser>,
+    pool: web::Data<DbPool>
+) -> impl Responder {
+    let mut conn = pool.get().expect("Couldn't get db connection from pool");
+
+    let user_result = users
+        .filter(username.eq(&login_req.username))
+        .first::<User>(&mut conn);
+
+    match user_result {
+        Ok(user) => {
+            if verify(&login_req.password, &user.password).unwrap() {
+                let claims = Claims {
+                    sub: user.username.clone(),
+                    exp: 10000000000,
+                };
+
+                let token = encode(&Header::default(), &claims, &EncodingKey::from_secret(b"key")).unwrap();
+                HttpResponse::Ok().json(token)
+            } else {
+                HttpResponse::Unauthorized().json("Invalid password")
+            }
+        },
+        Err(_) => {
+            HttpResponse::Unauthorized().json("User not found")
+        }
+    }
+}
+
+pub async fn register(
+    user: web::Json<NewUser>,
+    pool: web::Data<DbPool>
+) -> impl Responder {
+    let mut conn = pool.get().expect("Couldn't get db connection from pool");
+
+    let hashed_password = hash(&user.password, 4).unwrap();
+    let new_user = NewUser {
+        username: user.username.clone(),
+        password: hashed_password,
+        role: "user".to_string(),
+    };
+
+    diesel::insert_into(users)
+        .values(&new_user)
+        .execute(&mut conn)
+        .expect("Error saving new user");
+
+    HttpResponse::Ok().json("User registered")
+}
+
+.service(
+            web::resource("/auth")
+                .route(web::post().to(login))
+        )
+        .service(
+            web::resource("/register")
+                .route(web::post().to(register))
+        )
+
+
+        .wrap(
+        Cors::default()
+        .allow_any_origin()
+        .allow_any_method()
+        .allow_any_header()
+        .max_age(3600)
+        )
+
+        web::resource("/index")
+                            .route(web::get().to(auth_handler::index))
+
+
+                            #[get("/hello")]
+                            pub async fn hello() -> HttpResponse {
+                                HttpResponse::Ok().body("Hello, world!")
+                            }
+
+                            pub async fn index() -> impl Responder {
+                                HttpResponse::Ok().body("Hello, index!")
+                            }
+
+                            #[get("/hello")]
+                            pub async fn hello() -> HttpResponse {
+                                HttpResponse::Ok().body("Hello, world!")
+                            }
+
+                            pub async fn index() -> impl Responder {
+                                HttpResponse::Ok().body("Hello, index!")
+                            }
+
+.............................................................
+
+
+let conn_result = pool.get();
+    let mut conn = match conn_result {
+        Ok(conn) => {
+            info!("Successfully got DB connection from pool");
+            conn
+        },
+        Err(e) => {
+            info!("Failed to get DB connection from pool: {:?}", e);
+            return HttpResponse::InternalServerError().body("Failed to get DB connection from pool");
+        }
+    };
+
+
+
+
+
+    let insert_result = diesel::insert_into(users)
+        .values(&new_user)
+        .execute(&mut conn);
+
+    match insert_result {
+        Ok(_) => {
+            info!("User registered successfully");
+            HttpResponse::Ok().json("User registered")
+        },
+        Err(e) => {
+            info!("Error saving new user: {:?}", e);
+            HttpResponse::InternalServerError().body("Error saving new user")
+        }
+    }
