@@ -1,4 +1,4 @@
-use crate::structures::Email;
+use crate::modules::Email;
 use actix_web::{post, web, HttpResponse};
 use lettre::transport::smtp::authentication::Credentials;
 use lettre::transport::smtp::client::Tls;
@@ -7,9 +7,9 @@ use lettre::{SmtpTransport, Transport};
 
 #[post("/send_email")]
 pub async fn send_email(email_request: web::Json<Email>) -> Result<HttpResponse, actix_web::Error> {
-    let google_smtp_server = "smtp.gmail.com"; // Сервак который будем имеет прикол быть посредником между всеми операциями
-    let account_username = "proj.mail12@gmail.com"; // Я думаю понятно что это значит.
-    let account_password = "tpop pyhb cwsn rkqi"; // нет смысла че то объяснять библеотка заходит и отправляет че надо
+    let google_smtp_server = "smtp.gmail.com";
+    let account_username = "proj.mail12@gmail.com";
+    let account_password = "tpop pyhb cwsn rkqi";
 
     let message = create_message(account_username, &email_request)?;
     let credentials = create_credentials(account_username, account_password);
@@ -24,17 +24,15 @@ fn create_message(
 ) -> Result<lettre::Message, actix_web::Error> {
     lettre::Message::builder()
         .from(account_username.parse().map_err(|e| {
-            //откуда прибудет наше сообщения
             log::error!("Parsing Error -> {}", e);
             actix_web::error::ErrorInternalServerError("ErrorInternalServerError")
         })?)
         .to(email_request.to.parse().map_err(|e| {
-            // адрес доставки нашего опозиционного письма
             log::error!("Parsing Error -> {}", e);
             actix_web::error::ErrorInternalServerError("ErrorInternalServerError")
         })?)
-        .subject(&email_request.subject) // Любимый субждект, я описал кто он и что из себя представляет в Донецком обществе в полях структуры.
-        .body(email_request.body.clone()) // дружбан субджекта  так же описан в полях структуры
+        .subject(&email_request.subject)
+        .body(email_request.body.clone())
         .map_err(|e| {
             log::error!("Error to create responder message -> {}", e);
             actix_web::error::ErrorInternalServerError("ErrorInternalServerError")
@@ -53,7 +51,7 @@ fn create_transport_mailer(
         .map_err(|e| {
             log::error!("Error to crate smtp_mailer -> {}", e);
             actix_web::error::ErrorInternalServerError("ErrorInternalServerError")
-        })? // создаем меилер который отправит письмо!
+        })?
         .port(587)
         .credentials(credentials)
         .tls(Tls::Required(
@@ -70,17 +68,12 @@ async fn send_mail(
     message: &lettre::Message,
     email_request: &Email,
 ) -> Result<HttpResponse, actix_web::Error> {
-    match smtp_transport_mailer.send(message) {
-        // Результат всего всего всего
-        Ok(_) => {
-            Ok(HttpResponse::Ok().body(format!("Email sent successfully to {}", email_request.to)))
-        }
-        Err(e) => {
-            println!("{}", e);
-            Ok(HttpResponse::InternalServerError().body(format!(
-                "Error to send email to {}, error -> {}",
-                email_request.to, e
-            )))
-        }
-    }
+    smtp_transport_mailer.send(message).map_err(|e| {
+        log::error!("Error to send message -> {}", e);
+        actix_web::error::ErrorInternalServerError("ErrorInternalServerError")
+    })?;
+    Ok(HttpResponse::Ok().body(format!(
+        "Message to: {} successfully sent!",
+        email_request.to
+    )))
 }
