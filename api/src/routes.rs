@@ -1,12 +1,9 @@
 // маршрутизація
 
-use crate::handlers::auth_handler;
-use actix_web::{get, web, HttpResponse};
-
-
+use crate::handlers::{auth_handler, products_handler};
+use actix_web::{web};
 
 pub fn init(cfg: &mut web::ServiceConfig) {
-
     cfg.service(
         web::scope("/api")
             .service(
@@ -19,8 +16,29 @@ pub fn init(cfg: &mut web::ServiceConfig) {
             )
             .service(
                 web::resource("/index")
-                    .route(web::get().to(auth_handler::index)
+                    .route(web::get().to(auth_handler::index))
             )
-        )
+            .service(
+                web::resource("/create_product")
+                    .route(web::get().to(products_handler::create_product))
+            )
+            .service(
+                web::resource("/read_all_products")
+                    .route(web::get().to(products_handler::read_all_products))
+            )
+            .service(
+                web::resource("/read_product/{id}")
+                    .route(web::get().to(products_handler::read_product))
+            )
+            .service(
+                web::resource("/remove_product/{id}")
+                    .route(web::get().to(products_handler::remove_product))
+            )
+            .service(
+                web::resource("/update_product/{id}")
+                    .route(web::get().to(products_handler::update_product))
+            )
     );
 }
+
+
