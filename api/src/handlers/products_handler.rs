@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use log::info;
 use std::env;
+use std::ops::Deref;
 
 #[derive(Serialize, Deserialize, FromRow)]
 pub struct Product {
@@ -27,94 +28,69 @@ pub struct ProductUpdate {
     pub storage_quantity: Option<i32>,
 }
 
+const PRODUCT_SERVICE_URL: &str = "http://localhost:8083";
 
-pub async fn create_product(client: web::Data<Client>, req: web::Json<Product>) -> impl Responder {
-    let products_service_url = "http://localhost:8083";
-    let url = format!("{}/products/create_product/", products_service_url);
-
-    let res = client.post(&url)
-        .json(&*req)
-        .send()
-        .await;
-
-    match res {
-        Ok(response) => {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            HttpResponse::build(StatusCode::from_u16(status.as_u16()).unwrap()).body(body)
-        },
-        Err(_) => HttpResponse::InternalServerError().finish(),
-    }
+pub async fn create_product(client: web::Data<Client>, reqwest: web::Json<Product>) -> impl Responder {
+    let url = format!("{}/products/create_product/", PRODUCT_SERVICE_URL);
+    let response = client.post(&url).json(&*reqwest).send().await;
+    handle_response(response).await
 }
 
 pub async fn read_all_products(client: web::Data<Client>) -> impl Responder {
-    let products_service_url = "http://localhost:8083";
-    let url = format!("{}/products/read_all_products/", products_service_url);
+    let url = format!("{}/products/read_all_products/", PRODUCT_SERVICE_URL);
+    let response = client.get(&url).send().await;
+    handle_response(response).await
+}
 
-    let res = client.get(&url).send().await;
+pub async fn read_product(client: web::Data<Client>, product_id: web::Path<i32>) -> impl Responder {
+    let url = format!(
+        "{}/products/read_product/{}",
+        PRODUCT_SERVICE_URL, product_id
+    );
+    let response = client.get(&url).send().await;
+    handle_response(response).await
+}
 
-    match res {
+pub async fn remove_product(
+    client: web::Data<Client>,
+    product_id: web::Path<i32>,
+) -> impl Responder {
+    let url = format!(
+        "{}/products/remove_product/{}",
+        PRODUCT_SERVICE_URL, product_id
+    );
+    let response = client.get(&url).send().await;
+    handle_response(response).await
+}
+
+pub async fn update_product(
+    client: web::Data<Client>,
+    product_id: web::Path<i32>,
+) -> impl Responder {
+    let url = format!(
+        "{}/products/update_product/{}",
+        PRODUCT_SERVICE_URL, product_id
+    );
+    let response = client.put(&url).send().await;
+    handle_response(response).await
+}
+
+async fn handle_response(response: Result<reqwest::Response, reqwest::Error>) -> impl Responder {
+    match response {
         Ok(response) => {
             let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            info!("Received response with status: {}", status);
+            let body = match response.text().await {
+                Ok(text) => text,
+                Err(e) => {
+                    log::error!("Failed to read response body -> {}", e);
+                    return HttpResponse::InternalServerError().finish();
+                }
+            };
             HttpResponse::build(StatusCode::from_u16(status.as_u16()).unwrap()).body(body)
-        },
+        }
         Err(e) => {
-            info!("Error connecting: {}", e);
+            log::error!("Failed to get response -> {}", e);
             HttpResponse::InternalServerError().finish()
         }
     }
 }
-
-pub async fn read_product(
-    client: web::Data<Client>,
-    product_id: web::Path<i32>,
-) -> impl Responder {
-    let products_service_url = "http://localhost:8083";
-    let url = format!("{}/products/read_product/{}", products_service_url, product_id);
-
-    let res = client.get(&url).send().await;
-
-    match res {
-        Ok(response) => {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            HttpResponse::build(StatusCode::from_u16(status.as_u16()).unwrap()).body(body)
-        },
-        Err(_) => HttpResponse::InternalServerError().finish(),
-    }
-}
-
-pub async fn remove_product(client: web::Data<Client>, product_id: web::Path<i32>) -> impl Responder {
-    let products_service_url = "http://localhost:8083";
-    let url = format!("{}/products/remove_product/{}", products_service_url, product_id);
-
-    let res = client.get(&url).send().await;
-
-    match res {
-        Ok(response) => {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            HttpResponse::build(StatusCode::from_u16(status.as_u16()).unwrap()).body(body)
-        },
-        Err(_) => HttpResponse::InternalServerError().finish(),
-    }
-}
-
-pub async fn update_product(client: web::Data<Client>, product_id: web::Path<i32>) -> impl Responder {
-    let products_service_url = "http://localhost:8083";
-    let url = format!("{}/products/update_product/{}", products_service_url, product_id);
-
-    let res = client.get(&url).send().await;
-
-    match res {
-        Ok(response) => {
-            let status = response.status();
-            let body = response.text().await.unwrap_or_default();
-            HttpResponse::build(StatusCode::from_u16(status.as_u16()).unwrap()).body(body)
-        },
-        Err(_) => HttpResponse::InternalServerError().finish(),
-    }
-}
-
