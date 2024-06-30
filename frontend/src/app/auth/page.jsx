@@ -6,7 +6,7 @@ import { Tabs, Tab, Card, CardBody, Link } from "@nextui-org/react";
 import Login from "../../components/login";
 import Register from "../../components/register";
 
-function Authentication() {
+function authentication() {
   const [selected, setSelected] = React.useState("login");
 
   return (
@@ -45,4 +45,4 @@ function Authentication() {
   );
 }
 
-export default Authentication;
+export default authentication;

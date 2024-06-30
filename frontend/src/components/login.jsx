@@ -7,11 +7,12 @@ import { Input, Link, Button } from "@nextui-org/react";
 function Login() {
   const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8081/login', {
+            const response = await axios.post('http://localhost:8080/api/login', {
                 username,
                 password,
             });

@@ -1,18 +1,21 @@
 'use client'
 
-import React, {useState, useEffect} from "react";
-import {Input, Link, Button} from "@nextui-org/react";
+import React, {useState} from "react";
+import axios from "axios";  
+import {Input, Button} from "@nextui-org/react";
 
 function Register() {
   const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('user');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post('http://localhost:8081/register', {
+            const response = await axios.post('http://localhost:8080/api/register', {
                 username,
                 password,
+                role,
             });
             console.log(response.data);
         } catch (error) {
@@ -21,12 +24,12 @@ function Register() {
     };
 
   return (
-    <form className="flex flex-col gap-4 h-[300px]"onSubmit={handleSubmit} >
+    <form className="flex flex-col gap-4 h-[300px]" onSubmit={handleSubmit}>
       <Input
         isRequired
         label="Name"
         placeholder="Enter your name"
-        type="password"
+        type="text"  
         onChange={(e) => setUsername(e.target.value)}
       />
       <Input
@@ -36,8 +39,6 @@ function Register() {
         type="password"
         onChange={(e) => setPassword(e.target.value)}
       />
-      <p className="text-center text-small">
-      </p>
       <div className="flex gap-2 justify-end">
         <Button fullWidth color="primary" type="submit">
           Sign up
@@ -48,3 +49,4 @@ function Register() {
 }
 
 export default Register;
+
