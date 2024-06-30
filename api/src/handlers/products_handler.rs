@@ -106,7 +106,7 @@ pub async fn update_product(client: web::Data<Client>, product_id: web::Path<i32
     let products_service_url = "http://localhost:8083";
     let url = format!("{}/products/update_product/{}", products_service_url, product_id);
 
-    let res = client.get(&url).send().await;
+    let res = client.put(&url).send().await;
 
     match res {
         Ok(response) => {
