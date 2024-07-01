@@ -8,11 +8,12 @@ use actix_web::web::ServiceConfig;
 
 pub fn configure_product(cfg: &mut ServiceConfig) {
     cfg.service(
-        web::scope("products")
-            .route("", web::post().to(create_product))
-            .route("", web::get().to(read_all_products))
-            .route("/{id}", web::get().to(read_product))
-            .route("/{id}", web::delete().to(remove_product))
-            .route("/{id}", web::put().to(update_product)),
+        web::scope("/products")
+            .route("/create_product", web::post().to(create_product))
+            .route("/read_all_products)", web::get().to(read_all_products))
+            .route("/read_product/{id}", web::get().to(read_product))
+            .route("/remove_product/{id}", web::delete().to(remove_product))
+            .route("/update_product/{id}", web::put().to(update_product)),
     );
 }
+
