@@ -3,7 +3,7 @@ use crate::read_all_products::read_all_products;
 use actix_web::web;
 use sqlx::PgPool;
 
-pub async fn sort_products(
+ub async fn sort_products(
     pool: web::Data<PgPool>,
     wanted_name: Option<web::Json<WantedName>>,
     wanted_price: Option<web::Json<WantedPrice>>,
@@ -11,24 +11,22 @@ pub async fn sort_products(
 ) -> Result<web::Json<Vec<Product>>, actix_web::Error> {
     let mut all_products = read_all_products(pool).await?.into_inner().clone();
 
-    if let Some(wanted_name) = wanted_name {
-        all_products = sort_product_by_name(all_products, wanted_name)?;
-    }
-
-    if let Some(wanted_price) = wanted_price {
-        if wanted_price.lowest_to_highest.is_some() {
-            all_products = sort_product_from_lowest_to_highest_price(all_products)?
-        } else {
-            all_products = sort_product_for_highest_to_lowest_price(all_products)?
-        }
-    }
-
-    if let Some(wanted_address) = wanted_address {
-        all_products = sort_by_region(all_products, wanted_address)?
-    }
+    all_products = match (wanted_name, wanted_price, wanted_address){
+        (Some(wanted_name),_, _) => sort_product_by_name(all_products, wanted_name)?,
+        (_,Some(wanted_price), _) => {
+            if wanted_price.highest_to_lowest{
+                sort_product_for_highest_to_lowest_price(all_products)?
+            } else{
+                sort_product_from_lowest_to_highest_price(all_products)?
+            }
+        },
+        (_, _, Some(wanted_address)) => sort_by_region(all_products, wanted_address)?,
+        (_,_,_) => return Err(actix_web::error::ErrorBadRequest("Error data to sort product!"))
+    };
 
     Ok(web::Json(all_products))
 }
+
 
 fn sort_product_by_name(
     all_products: Vec<Product>,
