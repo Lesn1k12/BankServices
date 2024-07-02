@@ -1,3 +1,8 @@
+use crate::modules::{Product, WantedAddress, WantedName, WantedPrice};
+use crate::read_all_products::read_all_products;
+use actix_web::web;
+use sqlx::PgPool;
+
 pub async fn sort_products(
     pool: web::Data<PgPool>,
     wanted_name: Option<web::Json<WantedName>>,
