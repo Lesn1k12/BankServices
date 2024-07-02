@@ -14,6 +14,7 @@ pub struct LoginRequest {
 }
 
 const AUTH_SERVICE_URL: &str = "http://localhost:8081";
+
 pub async fn login(client: web::Data<Client>, login_req: web::Json<LoginRequest>) -> impl Responder {
     let url = format!("{}/auth/login", AUTH_SERVICE_URL);
 
