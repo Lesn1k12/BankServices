@@ -81,14 +81,13 @@ pub async fn handler_sort_product(
 ) -> Result<HttpResponse, actix_web::Error> {
     let url = format!("{}/products/sort_products", PRODUCT_SERVICE_URL);
 
-    if let Some(wanted_sort_item) = wanted_sort_item{
-        let response = send_request(&client, &url, Some(&wanted_sort_item)).await?;
-        build_response(response).await
-    }else{
-        let response = send_request(&client, &url, None::<&Value>).await?;
-        build_response(response).await
-    }
-    
+    let response = if let Some(wanted_sort_item) = wanted_sort_item {
+        send_request(&client, &url, Some(&wanted_sort_item)).await?
+    } else {
+        send_request(&client, &url, None::<&Value>).await?
+    };
+
+    build_response(response).await
 }
 
 async fn build_response(response: Response) -> Result<HttpResponse, actix_web::Error> {
