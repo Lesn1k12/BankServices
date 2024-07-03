@@ -24,13 +24,11 @@ pub async fn sort_products(
     Ok(web::Json(sorted_products))
 }
 
-fn sort_by_name(products: Vec<Product>, wanted_name: web::Json<WantedName>) -> Vec<Product> {
-    let sorted_products = products
+fn sort_by_name(mut products: Vec<Product>, wanted_name: web::Json<WantedName>) -> Vec<Product> {
+    products
         .into_iter()
         .filter(|product| product.name.contains(&wanted_name.name.to_lowercase()))
-        .collect();
-
-    sorted_products
+        .collect()
 }
 
 fn sort_by_price(products: Vec<Product>, wanted_price: web::Json<WantedPrice>) -> Vec<Product> {
