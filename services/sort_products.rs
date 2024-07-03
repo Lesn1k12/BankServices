@@ -1,5 +1,4 @@
 use crate::modules::{Product, WantedSortItem};
-use crate::read_all_products::read_all_products;
 use actix_web::web;
 use sqlx::PgPool;
 
@@ -76,10 +75,6 @@ fn sort_by_address(
     };
     products
 }
-
-use crate::modules::Product;
-use actix_web::web;
-use sqlx::PgPool;
 
 async fn read_all_products(
     pool: web::Data<PgPool>,
