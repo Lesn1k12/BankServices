@@ -40,18 +40,18 @@ fn sort_by_price(products: Vec<Product>, wanted_price: web::Json<WantedPrice>) -
 }
 
 fn sort_by_lowest_price(mut products: Vec<Product>) -> Vec<Product> {
-    products.sort_by(|a, b| {
-        a.price
-            .partial_cmp(&b.price)
+    products.sort_by(|product, next_product| {
+        product.price
+            .partial_cmp(&next_product.price)
             .unwrap_or(std::cmp::Ordering::Equal)
     });
     products
 }
 
 fn sort_by_highest_price(mut products: Vec<Product>) -> Vec<Product> {
-    products.sort_by(|a, b| {
-        b.price
-            .partial_cmp(&a.price)
+    products.sort_by(|product, next_product| {
+        next_product.price
+            .partial_cmp(&product.price)
             .unwrap_or(std::cmp::Ordering::Equal)
     });
     products
