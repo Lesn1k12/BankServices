@@ -5,12 +5,17 @@ use sqlx::PgPool;
 
 pub async fn sort_products(
     pool: web::Data<PgPool>,
-    wanted_sort_item: web::Json<WantedSortItem>,
+    wanted_sort_item: Option<web::Json<WantedSortItem>>,
 ) -> Result<web::Json<Vec<Product>>, actix_web::Error> {
     let all_products = read_all_products(pool).await?.into_inner();
-    let all_products = sort_by_name(all_products, &wanted_sort_item);
-    let all_products = sort_by_price(all_products, &wanted_sort_item);
-    let all_products = sort_by_address(all_products, &wanted_sort_item);
+
+    if let Some(wanted_sort_item) = wanted_sort_item {
+        let all_products = sort_by_name(all_products, &wanted_sort_item);
+        let all_products = sort_by_price(all_products, &wanted_sort_item);
+        let all_products = sort_by_address(all_products, &wanted_sort_item);
+        return Ok(web::Json(all_products));
+    };
+    
     Ok(web::Json(all_products))
 }
 
