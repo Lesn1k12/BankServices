@@ -3,10 +3,10 @@
 import React from "react";
 import { Tabs, Tab, Card, CardBody, Link } from "@nextui-org/react";
 
-import Login from "../../components/login";
-import Register from "../../components/register";
+import Login from "../../components/auth/login";
+import Register from "../../components/auth/register";
 
-function authentication() {
+function Authentication() {
   const [selected, setSelected] = React.useState("login");
 
   return (
@@ -45,4 +45,4 @@ function authentication() {
   );
 }
 
-export default authentication;
+export default Authentication;

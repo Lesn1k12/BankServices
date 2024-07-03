@@ -23,7 +23,7 @@ export default function Home() {
           </Link>
         </Button>
         <Button>
-          <Link href="/products">
+          <Link href="/admin/products">
             Products
           </Link>
         </Button>
@@ -33,3 +33,4 @@ export default function Home() {
       </>
     )
 }
+
