@@ -27,6 +27,7 @@ pub async fn handler_read_product(
         "{}/products/read_product/{}",
         PRODUCT_SERVICE_URL, product_id
     );
+    
     let response = send_request(&client, &url, None::<&Value>).await?;
     build_response(response).await
 }
@@ -61,7 +62,6 @@ pub async fn handler_update_product(
         log::error!("Error to get response with request! -> {}", e);
         actix_web::error::ErrorInternalServerError(format!("Error to get response -> {}", e))
     })?;
-
     build_response(response).await
 }
 
