@@ -1,5 +1,6 @@
-use crate::modules::{Product, WantedSortItem};
+use crate::models::products::{Product, WantedSortItem};
 use actix_web::{http::StatusCode, web, HttpResponse, Responder};
+use log::info;
 use reqwest::{Client, Response};
 use serde_json::Value;
 
@@ -59,7 +60,7 @@ pub async fn handler_sort_product(
     wanted_sort_item: Option<web::Json<WantedSortItem>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let url = format!("{}/products/sort_products", PRODUCT_SERVICE_URL);
-
+    info!("hihihaha");
     let response = if let Some(wanted_sort_item) = wanted_sort_item {
         send_request(client.get(&url), Some(&wanted_sort_item)).await?
     } else {

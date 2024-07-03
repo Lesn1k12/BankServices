@@ -1,11 +1,30 @@
-import React from 'react'
-import { getProduct } from '../../services/productService'
+'use client'
+
+import React, {useState} from 'react'
+import { getProduct } from '@/app/api/apiProducts'
+import { Button } from '@nextui-org/react'
 
 function GetProduct(id) {
-  let product = getProduct(id)
+  const [product, setProduct] = useState({
+    name: 'name',
+    price: '123.123',
+    category: 'category',
+    storage_country: 'country',
+    storage_region: 'region',
+    storage_street: 'street',
+    storage_quantity: '5'
+  })
+
+  const handlerSubmit = async () => {
+    const product = await getProduct(id)
+    setProduct(product)
+  }
 
   return (
-    <div>{product}</div>
+    <>
+      <Button onClick={() => handlerSubmit()}>get</Button>
+      <div>{product}</div>
+    </>
   )
 }
 

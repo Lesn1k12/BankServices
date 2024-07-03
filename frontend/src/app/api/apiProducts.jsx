@@ -22,17 +22,7 @@ export const getProduct = async (id) => {
         return response.data
     } catch (error) {
         console.error(error);
-    }
-};
-
-export const getAllProducts = async () => {
-    try {
-        const response = await axios.get(`${API_URL}/read_all_products`);
-        console.log(response.data);
-        return response.data
-    } catch (error) {
-        console.error(error);
-        return [{
+        return {
             name: 'name',
             price: '123.123',
             category: 'category',
@@ -40,9 +30,44 @@ export const getAllProducts = async () => {
             storage_region: 'region',
             storage_street: 'street',
             storage_quantity: '5'
-        }]
+        }
     }
 };
+
+const API_URL_PROD = 'http://localhost:8083';
+
+export const getAllProducts = async (data) => {
+    try {
+        const response = await axios.get(`${API_URL_PROD}/products/sort_products`);
+        console.log(response.data);
+        return response.data;
+    } catch (error) {
+        console.error('API Error:', error.response ? error.response.data : error.message);
+        return ([
+            {
+                id: 1,
+                name: 'name',
+                price: '123.123',
+                category: 'category',
+                storage_country: 'country',
+                storage_region: 'region',
+                storage_street: 'street',
+                storage_quantity: '5'
+            },
+            {
+                id: 2,
+                name: 'name2',
+                price: '123.1232',
+                category: 'category2',
+                storage_country: 'country2',
+                storage_region: 'region2',
+                storage_street: 'street2',
+                storage_quantity: '52'
+            },
+        ]);
+    }
+};
+
 
 export const deleteProduct = async (id) => {
     try {

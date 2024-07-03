@@ -1,5 +1,5 @@
 use crate::create_product::create_product;
-use crate::read_all_products::read_all_products;
+use crate::sort_products::sort_products;
 use crate::read_product::read_product;
 use crate::remove_product::remove_product;
 use crate::update_product::update_product;

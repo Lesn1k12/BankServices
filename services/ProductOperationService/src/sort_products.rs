@@ -1,11 +1,13 @@
 use crate::modules::{Product, WantedSortItem};
 use actix_web::web;
+use log::info;
 use sqlx::PgPool;
 
 pub async fn sort_products(
     pool: web::Data<PgPool>,
     wanted_sort_item: Option<web::Json<WantedSortItem>>,
 ) -> Result<web::Json<Vec<Product>>, actix_web::Error> {
+    info!("Sorting products");
     let all_products = read_all_products(pool).await?.into_inner();
 
     if let Some(wanted_sort_item) = wanted_sort_item {

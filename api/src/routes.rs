@@ -20,23 +20,23 @@ pub fn init(cfg: &mut web::ServiceConfig) {
             )
             .service(
                 web::resource("/create_product")
-                    .route(web::post().to(products_handler::create_product))
+                    .route(web::post().to(products_handler::handler_create_product))
             )
             .service(
                 web::resource("/read_all_products")
-                    .route(web::get().to(products_handler::read_all_products))
+                    .route(web::get().to(products_handler::handler_sort_product))
             )
             .service(
                 web::resource("/read_product/{id}")
-                    .route(web::get().to(products_handler::read_product))
+                    .route(web::get().to(products_handler::handler_read_product))
             )
             .service(
                 web::resource("/remove_product/{id}")
-                    .route(web::delete().to(products_handler::remove_product))
+                    .route(web::delete().to(products_handler::handler_remove_product))
             )
             .service(
                 web::resource("/update_product/{id}")
-                    .route(web::put().to(products_handler::update_product))
+                    .route(web::put().to(products_handler::handler_update_product))
             )
     );
 }

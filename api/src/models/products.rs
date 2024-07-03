@@ -1,6 +1,16 @@
 use serde::{Deserialize, Serialize};
+use sqlx::FromRow;
 
-#[derive(Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Serialize, Deserialize)]
+pub struct WantedSortItem {
+    pub name: Option<String>,
+    pub highest_to_lowest: Option<bool>,
+    pub lowest_to_highest: Option<bool>,
+    pub country: Option<String>,
+    pub region: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, FromRow)]
 pub struct Product {
     pub id: Option<i32>,
     pub name: String,
@@ -11,7 +21,6 @@ pub struct Product {
     pub storage_street: String,
     pub storage_quantity: i32,
 }
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ProductUpdate {
     pub name: Option<String>,
@@ -21,13 +30,4 @@ pub struct ProductUpdate {
     pub storage_region: Option<String>,
     pub storage_street: Option<String>,
     pub storage_quantity: Option<i32>,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct WantedSortItem {
-    pub name: Option<String>,
-    pub highest_to_lowest: Option<bool>,
-    pub lowest_to_highest: Option<bool>,
-    pub country: Option<String>,
-    pub region: Option<String>,
 }

@@ -1,18 +1,17 @@
 mod create_product;
 mod logger;
 mod modules;
-mod read_all_products;
 mod read_product;
 mod remove_product;
 mod server_config;
 mod update_product;
+mod sort_products;
 
 use actix_cors::Cors;
 use actix_web::web::ServiceConfig;
 use actix_web::{web, HttpServer, Responder};
 use create_product::create_product;
 use logger::initial_logger;
-use read_all_products::read_all_products;
 use read_product::read_product;
 use remove_product::remove_product;
 use server_config::configure_product;
@@ -21,7 +20,7 @@ use sqlx::Pool;
 use sqlx::Postgres;
 use update_product::update_product;
 
-const DB_ADDRESS: &str = "postgres://postgres:7AIQF41SDJZ@localhost:5432/postgres";
+const DB_ADDRESS: &str = "postgres://admin:admin@localhost:5432/bank_service";
 
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {
