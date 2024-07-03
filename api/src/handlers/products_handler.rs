@@ -27,7 +27,7 @@ pub async fn handler_read_product(
         "{}/products/read_product/{}",
         PRODUCT_SERVICE_URL, product_id
     );
-    let response = send_request::<Value>(&client, &url, None::<&Value>).await?;
+    let response = send_request(&client, &url, None::<&Value>).await?;
     build_response(response).await
 }
 
