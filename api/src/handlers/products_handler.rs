@@ -77,12 +77,18 @@ pub async fn handler_read_all_products(
 
 pub async fn handler_sort_product(
     client: web::Data<Client>,
-    wanted_sort_item: web::Json<WantedSortItem>,
+    wanted_sort_item: Option<web::Json<WantedSortItem>>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let url = format!("{}/products/sort_products", PRODUCT_SERVICE_URL);
 
-    let response = send_request(&client, &url, Some(&wanted_sort_item)).await?;
-    build_response(response).await
+    if let Some(wanted_sort_item) = wanted_sort_item{
+        let response = send_request(&client, &url, Some(&wanted_sort_item)).await?;
+        build_response(response).await
+    }else{
+        let response = send_request(&client, &url, None::<&Value>).await?;
+        build_response(response).await
+    }
+    
 }
 
 async fn build_response(response: Response) -> Result<HttpResponse, actix_web::Error> {
