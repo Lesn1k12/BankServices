@@ -11,11 +11,7 @@ pub async fn handler_create_product(
 ) -> Result<HttpResponse, actix_web::Error> {
     let url = format!("{}/products/create_product", PRODUCT_SERVICE_URL);
 
-    let response = client.post(&url).json(&product).send().await.map_err(|e| {
-        log::error!("Error to get response with request! -> {}", e);
-        actix_web::error::ErrorInternalServerError(format!("Error to get response -> {}", e))
-    })?;
-
+    let response = send_request(client.post(&url), Some(&product)).await?;
     build_response(response).await
 }
 
@@ -28,7 +24,7 @@ pub async fn handler_read_product(
         PRODUCT_SERVICE_URL, product_id
     );
 
-    let response = send_request(&client, &url, None::<&Value>).await?;
+    let response = send_request(client.get(&url), None::<&Value>).await?;
     build_response(response).await
 }
 
@@ -41,11 +37,7 @@ pub async fn handler_remove_product(
         PRODUCT_SERVICE_URL, product_id
     );
 
-    let response = client.delete(&url).send().await.map_err(|e| {
-        log::error!("Error to get response with request! -> {}", e);
-        actix_web::error::ErrorInternalServerError(format!("Error to get response -> {}", e))
-    })?;
-
+    let response = send_request(client.delete(&url), None::<&Value>).await?;
     build_response(response).await
 }
 
@@ -58,11 +50,7 @@ pub async fn handler_update_product(
         PRODUCT_SERVICE_URL, product_id
     );
 
-    let response = client.put(&url).send().await.map_err(|e| {
-        log::error!("Error to get response with request! -> {}", e);
-        actix_web::error::ErrorInternalServerError(format!("Error to get response -> {}", e))
-    })?;
-
+    let response = send_request(client.put(&url), None::<&Value>).await?;
     build_response(response).await
 }
 
@@ -73,9 +61,9 @@ pub async fn handler_sort_product(
     let url = format!("{}/products/sort_products", PRODUCT_SERVICE_URL);
 
     let response = if let Some(wanted_sort_item) = wanted_sort_item {
-        send_request(&client, &url, Some(&wanted_sort_item)).await?
+        send_request(client.get(&url), Some(&wanted_sort_item)).await?
     } else {
-        send_request(&client, &url, None::<&Value>).await?
+        send_request(client.get(&url), None::<&Value>).await?
     };
 
     build_response(response).await
@@ -109,22 +97,21 @@ fn convert_status_code_to_u16(
 }
 
 async fn send_request<T>(
-    client: &Client,
-    url: &str,
+    client: reqwest::RequestBuilder,
     body: Option<&T>,
 ) -> Result<Response, actix_web::Error>
 where
     T: serde::Serialize,
 {
     if let Some(body) = body {
-        client.get(url).json(body).send().await.map_err(|e| {
-            log::error!("Error to get response with json request! -> {}", e);
-            actix_web::error::ErrorInternalServerError(format!("Error to get response -> {}", e))
+        client.json(body).send().await.map_err(|e| {
+            log::error!("Error to send request ! -> {}", e);
+            actix_web::error::ErrorInternalServerError(format!("Error to send request ! -> {}", e))
         })
     } else {
-        client.get(url).send().await.map_err(|e| {
-            log::error!("Error to get response with request! -> {}", e);
-            actix_web::error::ErrorInternalServerError(format!("Error to get response -> {}", e))
+        client.send().await.map_err(|e| {
+            log::error!("Error to send request ! -> {}", e);
+            actix_web::error::ErrorInternalServerError(format!("Error to send request ! -> {}", e))
         })
     }
 }
