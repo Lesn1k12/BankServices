@@ -1,4 +1,4 @@
-use crate::modules::{Product, WantedAddress, WantedName, WantedPrice};
+use crate::modules::{Product, WantedSortItem};
 use actix_web::{http::StatusCode, web, HttpResponse, Responder};
 use reqwest::{Client, Response};
 use serde_json::Value;
@@ -27,7 +27,7 @@ pub async fn handler_read_product(
         "{}/products/read_product/{}",
         PRODUCT_SERVICE_URL, product_id
     );
-    
+
     let response = send_request(&client, &url, None::<&Value>).await?;
     build_response(response).await
 }
@@ -62,6 +62,7 @@ pub async fn handler_update_product(
         log::error!("Error to get response with request! -> {}", e);
         actix_web::error::ErrorInternalServerError(format!("Error to get response -> {}", e))
     })?;
+
     build_response(response).await
 }
 
@@ -69,19 +70,18 @@ pub async fn handler_read_all_products(
     client: web::Data<Client>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let url = format!("{}/products/read_all_products", PRODUCT_SERVICE_URL);
+
     let response = send_request(&client, &url, None::<&Value>).await?;
     build_response(response).await
 }
 
 pub async fn handler_sort_product(
     client: web::Data<Client>,
-    wanted_name: Option<web::Json<WantedName>>,
-    wanted_price: Option<web::Json<WantedPrice>>,
-    wanted_address: Option<web::Json<WantedAddress>>,
+    wanted_sort_item: web::Json<WantedSortItem>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let url = format!("{}/products/sort_products", PRODUCT_SERVICE_URL);
-    let response =
-        get_response_from_sort(&client, &url, wanted_name, wanted_price, wanted_address).await?;
+
+    let response = send_request(&client, &url, Some(&wanted_sort_item)).await?;
     build_response(response).await
 }
 
@@ -110,26 +110,6 @@ fn convert_status_code_to_u16(
             e
         ))
     })
-}
-
-async fn get_response_from_sort(
-    client: &web::Data<Client>,
-    url: &str,
-    wanted_name: Option<web::Json<WantedName>>,
-    wanted_price: Option<web::Json<WantedPrice>>,
-    wanted_address: Option<web::Json<WantedAddress>>,
-) -> Result<Response, actix_web::Error> {
-    match (wanted_name, wanted_price, wanted_address) {
-        (Some(wanted_name), _, _) => send_request(client, url, Some(&wanted_name)).await,
-        (_, Some(wanted_price), _) => send_request(client, url, Some(&wanted_price)).await,
-        (_, _, Some(wanted_address)) => send_request(client, url, Some(&wanted_address)).await,
-        _ => {
-            log::error!("Invalid data from get_response_json!");
-            Err(actix_web::error::ErrorBadRequest(
-                "Invalid data to get_response_json!",
-            ))
-        }
-    }
 }
 
 async fn send_request<T>(
