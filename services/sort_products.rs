@@ -27,8 +27,10 @@ fn sort_by_name(products: Vec<Product>, wanted_name: &web::Json<WantedSortItem>)
 fn sort_by_price(products: Vec<Product>, wanted_price: &web::Json<WantedSortItem>) -> Vec<Product> {
     if wanted_price.highest_to_lowest.is_some() {
         sort_by_highest_price(products)
-    } else {
+    } else if wanted_price.lowest_to_highest.is_some() {
         sort_by_lowest_price(products)
+    } else {
+        products
     }
 }
 
