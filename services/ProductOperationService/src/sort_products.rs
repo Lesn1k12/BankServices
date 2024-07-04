@@ -1,13 +1,11 @@
 use crate::modules::{Product, WantedSortItem};
 use actix_web::web;
-use log::info;
 use sqlx::PgPool;
 
 pub async fn sort_products(
     pool: web::Data<PgPool>,
     wanted_sort_item: Option<web::Json<WantedSortItem>>,
 ) -> Result<web::Json<Vec<Product>>, actix_web::Error> {
-    info!("Sorting products");
     let all_products = read_all_products(pool).await?.into_inner();
 
     if let Some(wanted_sort_item) = wanted_sort_item {
@@ -16,47 +14,56 @@ pub async fn sort_products(
         let all_products = sort_by_address(all_products, &wanted_sort_item);
         return Ok(web::Json(all_products));
     };
-    
+
     Ok(web::Json(all_products))
 }
 
-fn sort_by_name(products: Vec<Product>, wanted_name: &web::Json<WantedSortItem>) -> Vec<Product> {
+fn sort_by_name(
+    mut products: Vec<Product>,
+    wanted_name: &web::Json<WantedSortItem>,
+) -> Vec<Product> {
     if let Some(wanted_name) = &wanted_name.name {
-        return products
+        products = products
             .into_iter()
-            .filter(|product| product.name.contains(&wanted_name.to_lowercase()))
+            .filter(|product| {
+                product
+                    .name
+                    .to_lowercase()
+                    .contains(&wanted_name.to_lowercase())
+            })
             .collect();
+
+        products.sort_by(|product, next_product| product.name.cmp(&next_product.name));
     }
     products
 }
 
-fn sort_by_price(products: Vec<Product>, wanted_price: &web::Json<WantedSortItem>) -> Vec<Product> {
-    if wanted_price.highest_to_lowest.is_some() {
-        sort_by_highest_price(products)
-    } else if wanted_price.lowest_to_highest.is_some() {
-        sort_by_lowest_price(products)
-    } else {
-        products
+fn sort_by_price(
+    mut products: Vec<Product>,
+    wanted_price: &web::Json<WantedSortItem>,
+) -> Vec<Product> {
+    if let Some(wanted_price) = wanted_price.lowest_to_highest {
+        if wanted_price {
+            products.sort_by(|product, next_product| {
+                product
+                    .price
+                    .partial_cmp(&next_product.price)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            });
+        }
     }
-}
 
-fn sort_by_lowest_price(mut products: Vec<Product>) -> Vec<Product> {
-    products.sort_by(|product, next_product| {
-        product
-            .price
-            .partial_cmp(&next_product.price)
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
-    products
-}
+    if let Some(wanted_price) = wanted_price.highest_to_lowest {
+        if wanted_price {
+            products.sort_by(|product, next_product| {
+                next_product
+                    .price
+                    .partial_cmp(&product.price)
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            });
+        }
+    }
 
-fn sort_by_highest_price(mut products: Vec<Product>) -> Vec<Product> {
-    products.sort_by(|product, next_product| {
-        next_product
-            .price
-            .partial_cmp(&product.price)
-            .unwrap_or(std::cmp::Ordering::Equal)
-    });
     products
 }
 
@@ -69,8 +76,10 @@ fn sort_by_address(
             return products
                 .into_iter()
                 .filter(|product| {
-                    product.storage_country.to_lowercase() == wanted_country.to_lowercase()
-                        && product.storage_region.to_lowercase() == wanted_region.to_lowercase()
+                    product
+                        .storage_country
+                        .eq_ignore_ascii_case(&wanted_country)
+                        && product.storage_region.eq_ignore_ascii_case(wanted_region)
                 })
                 .collect();
         }
