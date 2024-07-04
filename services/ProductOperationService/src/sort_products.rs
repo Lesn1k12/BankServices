@@ -9,20 +9,14 @@ pub async fn sort_products(
     let all_products = read_all_products(pool).await?.into_inner();
 
     if let Some(wanted_sort_item) = wanted_sort_item {
-        let all_products = sort_by_name(all_products, &wanted_sort_item);
-        let all_products = sort_by_price(all_products, &wanted_sort_item);
-        let all_products = sort_by_address(all_products, &wanted_sort_item);
-        return Ok(web::Json(all_products));
+        return Ok(web::Json(merge_sort(all_products, wanted_sort_item)));
     };
 
     Ok(web::Json(all_products))
 }
 
-fn sort_by_name(
-    mut products: Vec<Product>,
-    wanted_name: &web::Json<WantedSortItem>,
-) -> Vec<Product> {
-    if let Some(wanted_name) = &wanted_name.name {
+fn merge_sort(mut products: Vec<Product>, wanted_item: web::Json<WantedSortItem>) -> Vec<Product> {
+    if let Some(wanted_name) = &wanted_item.name {
         products = products
             .into_iter()
             .filter(|product| {
@@ -33,16 +27,10 @@ fn sort_by_name(
             })
             .collect();
 
-        products.sort_by(|product, next_product| product.name.cmp(&next_product.name));
+        products.sort_by(|a, b| a.name.cmp(&b.name));
     }
-    products
-}
 
-fn sort_by_price(
-    mut products: Vec<Product>,
-    wanted_price: &web::Json<WantedSortItem>,
-) -> Vec<Product> {
-    if let Some(wanted_price) = wanted_price.lowest_to_highest {
+    if let Some(wanted_price) = wanted_item.lowest_to_highest {
         if wanted_price {
             products.sort_by(|product, next_product| {
                 product
@@ -53,7 +41,7 @@ fn sort_by_price(
         }
     }
 
-    if let Some(wanted_price) = wanted_price.highest_to_lowest {
+    if let Some(wanted_price) = wanted_item.highest_to_lowest {
         if wanted_price {
             products.sort_by(|product, next_product| {
                 next_product
@@ -64,15 +52,8 @@ fn sort_by_price(
         }
     }
 
-    products
-}
-
-fn sort_by_address(
-    products: Vec<Product>,
-    wanted_address: &web::Json<WantedSortItem>,
-) -> Vec<Product> {
-    if let Some(wanted_country) = &wanted_address.country {
-        if let Some(wanted_region) = &wanted_address.region {
+    if let Some(wanted_country) = &wanted_item.country {
+        if let Some(wanted_region) = &wanted_item.region {
             return products
                 .into_iter()
                 .filter(|product| {
@@ -84,6 +65,7 @@ fn sort_by_address(
                 .collect();
         }
     };
+
     products
 }
 
