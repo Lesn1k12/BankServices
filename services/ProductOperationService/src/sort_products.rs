@@ -28,7 +28,7 @@ fn merge_sort(mut products: Vec<Product>, wanted_item: web::Json<WantedSortItem>
             .collect();
 
         products.sort_by(|a, b| a.name.cmp(&b.name));
-    }
+    };
 
     if let Some(wanted_price) = wanted_item.lowest_to_highest {
         if wanted_price {
@@ -39,7 +39,7 @@ fn merge_sort(mut products: Vec<Product>, wanted_item: web::Json<WantedSortItem>
                     .unwrap_or(std::cmp::Ordering::Equal)
             });
         }
-    }
+    };
 
     if let Some(wanted_price) = wanted_item.highest_to_lowest {
         if wanted_price {
@@ -50,7 +50,7 @@ fn merge_sort(mut products: Vec<Product>, wanted_item: web::Json<WantedSortItem>
                     .unwrap_or(std::cmp::Ordering::Equal)
             });
         }
-    }
+    };
 
     if let Some(wanted_country) = &wanted_item.country {
         if let Some(wanted_region) = &wanted_item.region {
