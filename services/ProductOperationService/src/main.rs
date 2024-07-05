@@ -20,7 +20,7 @@ use sqlx::Pool;
 use sqlx::Postgres;
 use update_product::update_product;
 
-const DB_ADDRESS: &str = "postgres://admin:admin@localhost:5432/bank_service";
+const DB_ADDRESS: &str = "postgres://postgres:7AIQF41SDJZ@localhost:5432/postgres";
 
 #[actix_web::main]
 async fn main() -> anyhow::Result<()> {

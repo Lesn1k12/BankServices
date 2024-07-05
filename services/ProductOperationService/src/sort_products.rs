@@ -54,7 +54,7 @@ fn merge_sort(mut products: Vec<Product>, wanted_item: web::Json<WantedSortItem>
 
     if let Some(wanted_country) = &wanted_item.country {
         if let Some(wanted_region) = &wanted_item.region {
-            return products
+            products = products
                 .into_iter()
                 .filter(|product| {
                     product
@@ -65,6 +65,13 @@ fn merge_sort(mut products: Vec<Product>, wanted_item: web::Json<WantedSortItem>
                 .collect();
         }
     };
+
+    if let Some(wanted_category) = &wanted_item.category{
+         products = products
+             .into_iter()
+             .filter(|product| product.category.eq_ignore_ascii_case(&wanted_category))
+             .collect();
+    }
 
     products
 }

@@ -6,6 +6,7 @@ pub struct WantedSortItem {
     pub name: Option<String>,
     pub highest_to_lowest: Option<bool>,
     pub lowest_to_highest: Option<bool>,
+    pub category: Option<String>,
     pub country: Option<String>,
     pub region: Option<String>,
 }
