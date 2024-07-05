@@ -7,13 +7,13 @@ import { Button } from '@nextui-org/react'
 
 function CreateProduct() {
   const [product, setProduct] = useState({
-    name: 'name',
-    price: '123.123',
+    name: 'name2',
+    price: 123.123,
     category: 'category',
-    storage_country: 'country',
-    storage_region: 'region',
+    storage_country: 'USA',
+    storage_region: 'California',
     storage_street: 'street',
-    storage_quantity: '5'
+    storage_quantity: 5
   })  
     const handleSubmit = async (e) => {
     e.preventDefault()

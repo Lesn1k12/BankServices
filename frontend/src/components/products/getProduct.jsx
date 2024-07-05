@@ -4,7 +4,7 @@ import React, {useState} from 'react'
 import { getProduct } from '@/app/api/apiProducts'
 import { Button } from '@nextui-org/react'
 
-function GetProduct(id) {
+function GetProduct({id}) {
   const [product, setProduct] = useState({
     name: 'name',
     price: '123.123',
@@ -22,8 +22,7 @@ function GetProduct(id) {
 
   return (
     <>
-      <Button onClick={() => handlerSubmit()}>get</Button>
-      <div>{product}</div>
+      <button onClick={() => console.log('Get product', id)}>Get</button>;
     </>
   )
 }

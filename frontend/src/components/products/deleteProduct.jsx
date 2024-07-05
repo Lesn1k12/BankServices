@@ -2,9 +2,9 @@ import React from 'react'
 import { deleteProduct } from "@/app/api/apiProducts"
 import { Button } from '@nextui-org/react'
 
-function DeleteProduct(id) {
+function DeleteProduct({id}) {
   return (
-    <Button onClick={() => deleteProduct(id)}>delete</Button>
+    <button onClick={() => console.log('Delete product', id)}>Delete</button>
   )
 }
 

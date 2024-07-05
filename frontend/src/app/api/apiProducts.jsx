@@ -36,35 +36,30 @@ export const getProduct = async (id) => {
 
 const API_URL_PROD = 'http://localhost:8083';
 
+
+
 export const getAllProducts = async (data) => {
     try {
-        const response = await axios.get(`${API_URL_PROD}/products/sort_products`);
+        const response = await axios.post(`${API_URL_PROD}/products/sort_products`, data, {
+                headers: {
+                    'Content-Type': 'application/json',
+            
+        }}
+        );
         console.log(response.data);
-        return response.data;
+        return response.data
     } catch (error) {
-        console.error('API Error:', error.response ? error.response.data : error.message);
-        return ([
-            {
-                id: 1,
-                name: 'name',
-                price: '123.123',
-                category: 'category',
-                storage_country: 'country',
-                storage_region: 'region',
-                storage_street: 'street',
-                storage_quantity: '5'
-            },
-            {
-                id: 2,
-                name: 'name2',
-                price: '123.1232',
-                category: 'category2',
-                storage_country: 'country2',
-                storage_region: 'region2',
-                storage_street: 'street2',
-                storage_quantity: '52'
-            },
-        ]);
+        console.error(error);
+        return [{
+            id: 1,
+            name: 'name',
+            price: 123.123,
+            category: 'category',
+            storage_country: 'country',
+            storage_region: 'region',
+            storage_street: 'street',
+            storage_quantity: 5
+        }]
     }
 };
 
