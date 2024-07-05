@@ -62,9 +62,9 @@ pub async fn handler_sort_product(
     let url = format!("{}/products/sort_products", PRODUCT_SERVICE_URL);
     info!("hihihaha");
     let response = if let Some(wanted_sort_item) = wanted_sort_item {
-        send_request(client.get(&url), Some(&wanted_sort_item)).await?
+        send_request(client.post(&url), Some(&wanted_sort_item)).await?
     } else {
-        send_request(client.get(&url), None::<&Value>).await?
+        send_request(client.post(&url), None::<&Value>).await?
     };
 
     build_response(response).await
