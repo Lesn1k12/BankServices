@@ -10,7 +10,7 @@ pub fn configure_product(cfg: &mut ServiceConfig) {
     cfg.service(
         web::scope("/products")
             .route("/create_product", web::post().to(create_product))
-            .route("/sort_products", web::get().to(sort_products))
+            .route("/sort_products", web::post().to(sort_products))
             .route("/read_product/{id}", web::get().to(read_product))
             .route("/remove_product/{id}", web::delete().to(remove_product))
             .route("/update_product/{id}", web::put().to(update_product)),

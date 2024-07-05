@@ -24,7 +24,7 @@ pub fn init(cfg: &mut web::ServiceConfig) {
             )
             .service(
                 web::resource("/read_all_products")
-                    .route(web::get().to(products_handler::handler_sort_product))
+                    .route(web::post().to(products_handler::handler_sort_product))
             )
             .service(
                 web::resource("/read_product/{id}")

@@ -7,9 +7,12 @@
       <sourceFolder url="file://$MODULE_DIR$/services/mail_send/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/services/products/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/services/ProductOperationService/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/api/target" />
       <excludeFolder url="file://$MODULE_DIR$/services/mail_send/target" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
+      <excludeFolder url="file://$MODULE_DIR$/services/ProductOperationService/target" />
+      <excludeFolder url="file://$MODULE_DIR$/services/auth/target" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

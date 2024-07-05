@@ -40,7 +40,7 @@ async fn main() -> anyhow::Result<()> {
                     ])
                     .max_age(3600),
             )
-            .app_data(pool.clone())
+            .app_data(web::Data::new(pool.clone()))
             .configure(configure_product)
     })
     .bind("127.0.0.1:8083")?
