@@ -70,7 +70,8 @@ fn sort_by_price(products: &mut Vec<Product>, wanted_item: &web::Json<WantedSort
                 });
             }
         }
-        (_, _) => {}
+        
+        (_, _) => ()
     }
 
     Ok(())
