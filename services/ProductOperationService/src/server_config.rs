@@ -1,7 +1,7 @@
 use crate::create_product::create_product;
-use crate::sort_products::sort_products;
 use crate::read_product::read_product;
 use crate::remove_product::remove_product;
+use crate::sort_products::sort_products;
 use crate::update_product::update_product;
 use actix_web::web;
 use actix_web::web::ServiceConfig;
@@ -16,5 +16,3 @@ pub fn configure_product(cfg: &mut ServiceConfig) {
             .route("/update_product/{id}", web::put().to(update_product)),
     );
 }
-
-

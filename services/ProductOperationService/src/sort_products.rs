@@ -15,20 +15,35 @@ pub async fn sort_products(
     Ok(web::Json(all_products))
 }
 
-fn merge_sorts(mut products: Vec<Product>, wanted_item: &web::Json<WantedSortItem>) -> Result<Vec<Product>, actix_web::Error> {
-    filter_and_sort(&mut products, &wanted_item.name, |product| product.name.to_lowercase());
-    filter_and_sort(&mut products, &wanted_item.country, |product| product.storage_country.to_lowercase());
-    filter_and_sort(&mut products, &wanted_item.region, |product| product.storage_region.to_lowercase());
-    filter_and_sort(&mut products, &wanted_item.category, |product| product.category.to_lowercase());
+fn merge_sorts(
+    mut products: Vec<Product>,
+    wanted_item: &web::Json<WantedSortItem>,
+) -> Result<Vec<Product>, actix_web::Error> {
+    filter_and_sort(&mut products, &wanted_item.name, |product| {
+        product.name.to_lowercase()
+    });
+
+    filter_and_sort(&mut products, &wanted_item.country, |product| {
+        product.storage_country.to_lowercase()
+    });
+
+    filter_and_sort(&mut products, &wanted_item.region, |product| {
+        product.storage_region.to_lowercase()
+    });
+
+    filter_and_sort(&mut products, &wanted_item.category, |product| {
+        product.category.to_lowercase()
+    });
+
     sort_by_price(&mut products, &wanted_item)?;
 
     Ok(products)
 }
 
 fn filter_and_sort<T, F>(products: &mut Vec<Product>, wanted_item: &Option<T>, field_extractor: F)
-    where
-        F: Fn(&Product) -> String,
-        T: std::fmt::Display,
+where
+    T: std::fmt::Display,
+    F: Fn(&Product) -> String,
 {
     if let Some(wanted_value) = wanted_item {
         products.retain(|product| {
@@ -41,12 +56,16 @@ fn filter_and_sort<T, F>(products: &mut Vec<Product>, wanted_item: &Option<T>, f
     }
 }
 
-
-fn sort_by_price(products: &mut Vec<Product>, wanted_item: &web::Json<WantedSortItem>) -> Result<(), actix_web::Error>{
-    match (wanted_item.lowest_to_highest, wanted_item.highest_to_lowest){
+fn sort_by_price(
+    products: &mut Vec<Product>,
+    wanted_item: &web::Json<WantedSortItem>,
+) -> Result<(), actix_web::Error> {
+    match (wanted_item.lowest_to_highest, wanted_item.highest_to_lowest) {
         (Some(_), Some(_)) => {
             log::error!("You can sort by price only with 1 parameter!");
-            return Err(actix_web::error::ErrorInternalServerError("You can sort by price only with 1 parameter!"));
+            return Err(actix_web::error::ErrorInternalServerError(
+                "You can sort by price only with 1 parameter!",
+            ));
         }
 
         (Some(true), _) => {
@@ -67,12 +86,11 @@ fn sort_by_price(products: &mut Vec<Product>, wanted_item: &web::Json<WantedSort
             });
         }
 
-        (_, _) => ()
+        (_, _) => (),
     }
 
     Ok(())
 }
-
 
 async fn read_all_products(
     pool: web::Data<PgPool>,

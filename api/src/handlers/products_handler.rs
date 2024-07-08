@@ -61,6 +61,7 @@ pub async fn handler_sort_product(
 ) -> Result<HttpResponse, actix_web::Error> {
     let url = format!("{}/products/sort_products", PRODUCT_SERVICE_URL);
     info!("hihihaha");
+
     let response = if let Some(wanted_sort_item) = wanted_sort_item {
         send_request(client.post(&url), Some(&wanted_sort_item)).await?
     } else {

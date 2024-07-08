@@ -1,11 +1,12 @@
+mod create_order;
 mod create_product;
 mod logger;
 mod modules;
 mod read_product;
 mod remove_product;
 mod server_config;
-mod update_product;
 mod sort_products;
+mod update_product;
 
 use actix_cors::Cors;
 use actix_web::web::ServiceConfig;

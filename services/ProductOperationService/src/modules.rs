@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
 
 #[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct Product {
@@ -12,7 +12,7 @@ pub struct Product {
     pub storage_quantity: i32,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow, Default)]
 pub struct ProductUpdate {
     pub name: Option<String>,
     pub price: Option<f64>,
@@ -31,4 +31,16 @@ pub struct WantedSortItem {
     pub category: Option<String>,
     pub country: Option<String>,
     pub region: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, sqlx::FromRow)]
+pub struct Order {
+    pub id: Option<i32>,
+    pub product: Product,
+    pub wanted_quantity: i32,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Orders {
+    pub orders: Vec<Order>,
 }
