@@ -52,9 +52,9 @@ async fn update_to_product_table(pool: &web::Data<PgPool>, product_id: i32, orde
 async fn insert_to_order_table(pool: &web::Data<PgPool>, order_product: &Order) -> Result<(), actix_web::Error>{
     let _ = sqlx::query(
         r#"
-                    INSERT INTO orders (product, wanted_quantity)
-                    VALUES ($1, $2)
-                    "#,
+             INSERT INTO orders (product, wanted_quantity)
+             VALUES ($1, $2)
+             "#,
         )
         .bind(Json(&order_product.product))
         .bind(&order_product.wanted_quantity)
