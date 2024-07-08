@@ -57,14 +57,14 @@ fn sort_by_price(
     wanted_item: &web::Json<WantedSortItem>,
 ) -> Result<(), actix_web::Error> {
     match (wanted_item.lowest_to_highest, wanted_item.highest_to_lowest) {
-        (Some(_), Some(_)) => {
+        (Some(true), Some(true)) => {
             log::error!("You can sort by price only with 1 parameter!");
             return Err(actix_web::error::ErrorInternalServerError(
                 "You can sort by price only with 1 parameter!",
             ));
         }
 
-        (Some(true), _) => {
+        (Some(true), Some(false) => {
             products.sort_by(|product, next_product| {
                 product
                     .price
@@ -73,7 +73,7 @@ fn sort_by_price(
             });
         }
 
-        (_, Some(true)) => {
+        (Some(false), Some(true)) => {
             products.sort_by(|product, next_product| {
                 next_product
                     .price
