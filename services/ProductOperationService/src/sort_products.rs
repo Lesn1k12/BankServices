@@ -64,7 +64,7 @@ fn sort_by_price(
             ));
         }
 
-        (Some(true), Some(false) => {
+        (Some(true), Some(false)) => {
             products.sort_by(|product, next_product| {
                 product
                     .price
