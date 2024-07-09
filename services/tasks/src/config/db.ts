@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
     try{
-        await mongoose.connect('link')
+        await mongoose.connect('mongodb://admin:admin@localhost:27017/logistics')
         console.log('Connection to MongoDB successfull');
     }
     catch(err){

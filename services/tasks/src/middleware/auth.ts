@@ -1,5 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { isValidToken } from '../utils/validator';
+
+const TOKEN_SECRET = "nYSvA9hsWvSZT/AOMcmiNze/YGtkwEFUMfCbos0LTgM="
 
 export interface CustomRequest extends Request {
     user?: { id: string };
@@ -7,14 +10,12 @@ export interface CustomRequest extends Request {
 
 export const validateToken = (req: CustomRequest, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(' ')[1] ?? '';
-    if (!token) {
-        return res.status(401).send('Access Denied');
-    }
-    if(!process.env.TOKEN_SECRET) {
-        return res.status(500).send('Internal Server Error');
-    }
 
-    const secret = process.env.TOKEN_SECRET as string;
+    if (!isValidToken(token)) {
+        return res.status(401).send('Invalid Token');
+    }
+    
+    const secret = TOKEN_SECRET as string;
 
     try{
         const decoded = jwt.verify(token, secret) as JwtPayload;
