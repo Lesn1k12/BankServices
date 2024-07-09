@@ -1,36 +1,24 @@
-"use client"
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@nextui-org/react";
 import axios from "axios";
+import { useState } from "react";
 
+import CreateProduct from "@/components/products/createProduct";
+import ProductsTable from "@/components/products/productsTable";
+import Sidebar from "@/components/sidebar";
 
 export default function Home() {
-    const index = async () => {
-        try {
-            const response = await axios.get('http://localhost:8080/api/index');
-            console.log(response.data);
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    return (
-      <>
-        <Button>
-          <Link href="/auth">
-            Login
-          </Link>
-        </Button>
-        <Button>
-          <Link href="/admin/products">
-            Products
-          </Link>
-        </Button>
-        <Button onClick = {index}>
-          index
-        </Button>
-      </>
-    )
+  return (
+    <>
+      <Button>
+        <Link href="/auth">Login</Link>
+      </Button>
+      <Button>
+        <Link href="/admin/products">Products</Link>
+      </Button>
+      <Button>index</Button>
+    </>
+  );
 }
-
