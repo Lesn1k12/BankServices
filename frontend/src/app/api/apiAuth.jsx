@@ -2,6 +2,10 @@ import axios from "axios";
 
 const API_URL = 'http://localhost:8080/api';
 
+export const getTokenFromLocalStorage = () => {
+  const token = localStorage.getItem('token');
+  return token;
+};
 
 export const login = async (username, password) => {
     console.log('Attempting to log in', { username, password });

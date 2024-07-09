@@ -79,7 +79,6 @@ pub async fn login(login_user: web::Json<LoginUser>, pool: web::Data<DbPool>) ->
 pub async fn register(user: web::Json<NewUser>, pool: web::Data<DbPool>) -> HttpResponse {
     info!("Received register request: {:?}", user);
 
-    // Перевірка отриманих даних
     info!("Username: {}", user.username);
     info!("Password: {}", user.password);
     info!("Role: {}", user.role);
