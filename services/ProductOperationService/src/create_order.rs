@@ -33,7 +33,7 @@ pub async fn create_order(
     Ok(HttpResponse::Ok().json("Order created successfully!"))
 }
 
-pub async fn update_to_product_table(
+async fn update_to_product_table(
     pool: &web::Data<PgPool>,
     product_id: i32,
     order_product: &mut Order,
