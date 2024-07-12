@@ -8,9 +8,9 @@ use crate::read_order::read_order;
 pub fn configure_product(cfg: &mut ServiceConfig) {
     cfg.service(
         web::scope("/orders")
-            .route("/create_order/{client_id]", web::post().to(create_order))
+            .route("/create_order", web::post().to(create_order))
             .route("/delete_order/{id}", web::delete().to(delete_order))
             .route("/read_order/{id}", web::get().to(read_order))
-            .route("/read_all_orders/{client_id}", web::post().to(read_all_orders))
+            .route("/read_all_orders", web::post().to(read_all_orders))
     );
 }

@@ -5,7 +5,6 @@ mod modules;
 mod update_product;
 mod delete_order;
 mod read_order;
-mod test;
 mod read_all_orders;
 mod test;
 

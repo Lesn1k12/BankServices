@@ -15,9 +15,7 @@ use reqwest::Client;
 #[actix_web::main] //api
 async fn main() -> Result<()> {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
-
     info!("api main");
-
     let client = Client::new();
 
 

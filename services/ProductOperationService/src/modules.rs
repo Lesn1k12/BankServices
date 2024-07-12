@@ -33,14 +33,3 @@ pub struct WantedSortItem {
     pub region: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, sqlx::FromRow)]
-pub struct Order {
-    pub product: Product,
-    pub wanted_quantity: i32,
-}
-
-#[derive(Serialize, Deserialize, sqlx::FromRow)]
-pub struct Orders {
-    pub id: Option<i32>,
-    pub orders: Vec<Order>,
-}

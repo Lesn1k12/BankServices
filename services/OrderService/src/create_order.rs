@@ -1,72 +1,48 @@
-use crate::modules::{Order, ProductUpdate};
+use crate::modules::{Order, Orders, ProductUpdate};
 use crate::update_product::update_product;
 use actix_web::{web, HttpResponse};
 use core::default::Default;
 use sqlx::types::Json;
 use sqlx::PgPool;
+use jsonwebtoken::{decode, DecodingKey, Validation, Algorithm};
+use serde_json::json;
+
 
 pub async fn create_order(
     pool: web::Data<PgPool>,
-    client_id: web::Path<i32>,
-    mut order_list: web::Json<Vec<Order>>,
+    mut order_list: web::Json<Orders>,
 ) -> Result<HttpResponse, actix_web::Error> {
-    let mut buffer = Vec::new();
-    for order_product in &mut order_list.0 {
-        if let Some(product_id) = order_product.product.id {
-            if order_product.product.storage_quantity >= order_product.wanted_quantity
-                && order_product.product.storage_quantity > 0
-            {
-                update_to_product_table(&pool, product_id, order_product).await?;
-                order_product.user_id = *client_id;
-                buffer.push(order_product);
-            } else {
-                return Err(actix_web::error::ErrorForbidden(
-                    "We don't have that many items!",
-                ));
-            }
-        } else {
-            return Err(actix_web::error::ErrorBadRequest(
-                "Я тебе говорил далбоебу отправить id вместе и продуктом!",
-            ));
-        }
+    for order in &mut order_list.orders{
+        order.product_storage_quantity -= order.wanted_quantity;
+        let product_update = ProductUpdate {
+            storage_quantity: Some(order.product_storage_quantity),
+            ..Default::default()
+        };
+
+        update_product(pool.clone(), web::Path::from(order.product_id), web::Json(product_update)).await?;
+        log::info!("Product updated successfully!");
     }
 
-    insert_to_order_table(&pool, buffer).await?;
+    insert_to_order_table(&pool, &order_list).await?;
+    log::info!("Order inserted successfully!");
+
     Ok(HttpResponse::Ok().json("Order created successfully!"))
 }
 
-async fn update_to_product_table(
-    pool: &web::Data<PgPool>,
-    product_id: i32,
-    order_product: &mut Order,
-) -> Result<(), actix_web::Error> {
-    order_product.product.storage_quantity -= order_product.wanted_quantity;
-    let product_update = ProductUpdate {
-        storage_quantity: Some(order_product.product.storage_quantity),
-        ..Default::default()
-    };
-
-    update_product(
-        pool.clone(),
-        web::Path::from(product_id),
-        web::Json(product_update),
-    )
-        .await?;
-
-    Ok(())
-}
 
 async fn insert_to_order_table(
     pool: &web::Data<PgPool>,
-    order_product: Vec<&mut Order>,
+    order_product: &Orders,
 ) -> Result<(), actix_web::Error> {
     let _ = sqlx::query(
         r#"
-             INSERT INTO orders (orders)
-             VALUES ($1)
-             "#,
+           INSERT INTO orders (orders, user_id, user_name)
+           VALUES ($1, $2, $3)
+        "#,
     )
-        .bind(Json(&order_product))
+        .bind(Json(&order_product.orders))
+        .bind(&order_product.user_id)
+        .bind(&order_product.user_name)
         .execute(pool.get_ref())
         .await
         .map_err(|e| {
