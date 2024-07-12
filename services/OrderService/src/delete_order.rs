@@ -12,7 +12,7 @@ pub async fn delete_order(
     orders_id: web::Path<i32>,
 ) -> Result<HttpResponse, actix_web::Error> {
     let row = get_row(&pool, &orders_id).await?;
-    let id: i32 = get_id_by_row(&row)?;
+    let id = get_id_by_row(&row)?;
     let body = get_body_by_row(&row)?;
 
     for mut order in body{
