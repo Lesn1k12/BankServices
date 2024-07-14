@@ -1,10 +1,10 @@
 // обробка запитів авторизації
 
-use actix_web::{get, web, HttpResponse, Responder, http::StatusCode}; // Додавання http::StatusCode з actix-web
-use serde::{Deserialize, Serialize};
-use reqwest::Client;
-use std::env;
+use actix_web::{get, http::StatusCode, web, HttpResponse, Responder}; // Додавання http::StatusCode з actix-web
 use log::info;
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
+use std::env;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct LoginRequest {
@@ -15,26 +15,26 @@ pub struct LoginRequest {
 
 const AUTH_SERVICE_URL: &str = "http://localhost:8081";
 
-pub async fn login(client: web::Data<Client>, login_req: web::Json<LoginRequest>) -> impl Responder {
+pub async fn login(
+    client: web::Data<Client>,
+    login_req: web::Json<LoginRequest>,
+) -> impl Responder {
     let url = format!("{}/auth/login", AUTH_SERVICE_URL);
 
-    let res = client.post(&url)
-        .json(&*login_req)
-        .send()
-        .await;
+    let res = client.post(&url).json(&*login_req).send().await;
 
     handle_response(res).await
 }
 
-pub async fn register(client: web::Data<Client>, register_req: web::Json<LoginRequest>) -> impl Responder {
+pub async fn register(
+    client: web::Data<Client>,
+    register_req: web::Json<LoginRequest>,
+) -> impl Responder {
     info!("Registering user");
     info!("Request: {:?}", &register_req);
     let url = format!("{}/auth/register", AUTH_SERVICE_URL);
 
-    let res = client.post(&url)
-        .json(&*register_req)
-        .send()
-        .await;
+    let res = client.post(&url).json(&*register_req).send().await;
     info!("jest json");
     info!("Response: {:?}", res);
 
@@ -64,8 +64,7 @@ async fn handle_response(response: Result<reqwest::Response, reqwest::Error>) ->
                 }
             };
             HttpResponse::build(StatusCode::from_u16(status.as_u16()).unwrap()).body(body)
-        },
+        }
         Err(_) => HttpResponse::InternalServerError().finish(),
     }
 }
-

@@ -1,14 +1,12 @@
-use actix_web::{test, web, App};
 use actix_web::http::StatusCode;
+use actix_web::{test, web, App};
 use dotenv::dotenv;
 use reqwest::Client;
 use std::env;
 
-
 // Імпорт ваших модулів
 use crate::handlers;
 use crate::routes;
-
 
 #[cfg(test)]
 mod tests_auth {
@@ -25,12 +23,11 @@ mod tests_auth {
         let mut app = test::init_service(
             App::new()
                 .app_data(web::Data::new(client))
-                .configure(routes::init)
-        ).await;
+                .configure(routes::init),
+        )
+        .await;
 
-        let req = test::TestRequest::get()
-            .uri("/api/index")
-            .to_request();
+        let req = test::TestRequest::get().uri("/api/index").to_request();
 
         let resp = test::call_service(&mut app, req).await;
         assert_eq!(resp.status(), StatusCode::OK);

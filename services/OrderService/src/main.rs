@@ -12,7 +12,7 @@ mod test;
 use actix_cors::Cors;
 use actix_web::{web, web::ServiceConfig, HttpServer, Responder};
 use logger::initial_logger;
-use server_config::configure_product;
+use server_config::configure_order;
 use sqlx::{postgres::PgPool, Pool, Postgres};
 
 const DB_ADDRESS: &str = "postgres://postgres:7AIQF41SDJZ@localhost:5432/postgres";
@@ -36,9 +36,9 @@ async fn main() -> anyhow::Result<()> {
                     .max_age(3600),
             )
             .app_data(web::Data::new(pool.clone()))
-            .configure(configure_product)
+            .configure(configure_order)
     })
-        .bind("127.0.0.1:8084")?
+        .bind("127.0.0.1:8085")?
         .run()
         .await;
 

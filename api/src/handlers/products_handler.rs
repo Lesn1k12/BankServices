@@ -71,7 +71,7 @@ pub async fn handler_sort_product(
     build_response(response).await
 }
 
-async fn build_response(response: Response) -> Result<HttpResponse, actix_web::Error> {
+pub async fn build_response(response: Response) -> Result<HttpResponse, actix_web::Error> {
     let status = response.status();
     let response_body = get_response_body(response).await?;
     let converted_status = convert_status_code_to_u16(&status)?;
@@ -79,7 +79,7 @@ async fn build_response(response: Response) -> Result<HttpResponse, actix_web::E
     Ok(HttpResponse::build(converted_status).body(response_body))
 }
 
-async fn get_response_body(response: Response) -> Result<String, actix_web::Error> {
+pub async fn get_response_body(response: Response) -> Result<String, actix_web::Error> {
     response.text().await.map_err(|e| {
         log::error!("Error to get response body -> {}", e);
         actix_web::error::ErrorInternalServerError(format!("Error to get response body -> {}", e))
@@ -98,7 +98,7 @@ fn convert_status_code_to_u16(
     })
 }
 
-async fn send_request<T>(
+pub async fn send_request<T>(
     client: reqwest::RequestBuilder,
     body: Option<&T>,
 ) -> Result<Response, actix_web::Error>
