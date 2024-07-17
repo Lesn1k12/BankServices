@@ -1,6 +1,6 @@
 // обробка запитів авторизації
 
-use actix_web::{get, http::StatusCode, web, HttpResponse, Responder}; // Додавання http::StatusCode з actix-web
+use actix_web::{get, http::StatusCode, web, HttpResponse, Responder};
 use log::info;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};

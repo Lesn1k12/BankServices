@@ -1,6 +1,6 @@
 // маршрутизація
 
-use crate::handlers::{auth_handler, orders_handler, products_handler};
+use crate::handlers::{auth_handler, orders_handler, products_handler, tasks_handler};
 use actix_web::web;
 
 pub fn init(cfg: &mut web::ServiceConfig) {
@@ -44,6 +44,26 @@ pub fn init(cfg: &mut web::ServiceConfig) {
             .service(
                 web::resource("/read_all_orders")
                     .route(web::post().to(orders_handler::read_all_orders_handler)),
-            ),
+            )
+            .service(
+                web::resource("/create_task")
+                    .route(web::post().to(tasks_handler::create_task)),
+            )
+            .service(
+                web::resource("/get_tasks")
+                    .route(web::get().to(tasks_handler::get_tasks)),
+            )
+            .service(
+                web::resource("/get_task_by_id/{id}")
+                    .route(web::get().to(tasks_handler::get_task_by_id)),
+            )
+            .service(
+                web::resource("/delete_task/{id}")
+                    .route(web::delete().to(tasks_handler::delete_task)),
+            )
+            .service(
+                web::resource("/update_task/{id}")
+                    .route(web::put().to(tasks_handler::update_task)),
+            )
     );
 }
