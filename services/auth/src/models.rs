@@ -13,17 +13,10 @@ pub struct User {
     pub password: String,
     pub role: String,
 }
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct LoginUser {
     pub username: String,
     pub password: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct AuthResponse {
-    pub token: String,
-    pub expires_in: u64,
 }
 
 #[derive(Debug, Insertable, Serialize, Deserialize)]

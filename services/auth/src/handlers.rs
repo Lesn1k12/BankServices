@@ -4,17 +4,14 @@ use actix_web::{web, HttpResponse, Responder};
 use diesel::prelude::*;
 use bcrypt::{hash, verify};
 use diesel::r2d2;
-use diesel::r2d2::ConnectionManager;
+use diesel::r2d2::{ConnectionManager, PooledConnection};
 use jsonwebtoken::{encode, Header, EncodingKey};
 use crate::models::{User, NewUser, LoginUser, Claims};
 use crate::schema::users::dsl::*;
 use crate::db::DbPool;
-use crate::schema::users::dsl::*;
+use crate::schema::users::dsl::{users, username as db_username};
 use std::time::{SystemTime, UNIX_EPOCH};
-
-
 const SECRET: &[u8] = b"nYSvA9hsWvSZT/AOMcmiNze/YGtkwEFUMfCbos0LTgM=";
-
 pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/auth")
@@ -24,42 +21,38 @@ pub fn init(cfg: &mut web::ServiceConfig) {
     );
 }
 
-pub async fn login(login_user: web::Json<LoginUser>, pool: web::Data<DbPool>) -> HttpResponse {
-
-    let conn_result = pool.get();
-    let mut conn = match conn_result {
+async fn pool_response(pool: web::Data<DbPool>) -> Result<PooledConnection<ConnectionManager<PgConnection>>, HttpResponse> {
+    match pool.get() {
         Ok(conn) => {
             info!("Successfully got DB connection from pool");
-            conn
+            Ok(conn)
         },
         Err(e) => {
             info!("Failed to get DB connection from pool: {:?}", e);
-            return HttpResponse::InternalServerError().body(format!("Failed to get DB connection from pool: {:?}", e));
+            Err(HttpResponse::InternalServerError().body(format!("Failed to get DB connection from pool: {:?}", e)))
         }
-    };
+    }
+}
 
-    let user_result = users.filter(username.eq(&login_user.username))
-        .first::<User>(&mut conn)
+async fn find_user(conn: &mut PgConnection, input_username: &str) -> Result<Option<User>, HttpResponse> {
+    users
+        .filter(db_username.eq(&input_username))
+        .first::<User>(conn)
         .optional()
-        .expect("Error loading user");
+        .map_err(|_| {
+            info!("Error loading user");
+            HttpResponse::InternalServerError().body("Error loading user")
+        })
+}
 
-    let user = match user_result {
-        Some(user) => {
-            user
-        },
-        None => {
-            info!("User not found");
-            return HttpResponse::NotFound().body("User not found");
-        }
-    };
-
-    if verify(&login_user.password, &user.password).unwrap_or(false) {
+async fn verify_password_and_generate_token(user: User, input_password: &str) -> Result<String, HttpResponse> {
+    if verify(input_password, &user.password).unwrap_or(false) {
         info!("Password is correct");
 
         let expiration = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .expect("Time went backwards")
-        .as_secs() + 3600;
+            .duration_since(UNIX_EPOCH)
+            .expect("Time went backwards")
+            .as_secs() + 3600;
 
         let claims = Claims {
             sub: user.username.clone(),
@@ -69,42 +62,14 @@ pub async fn login(login_user: web::Json<LoginUser>, pool: web::Data<DbPool>) ->
         let token = claims.encode(SECRET);
         info!("Token: {:?}", &token);
 
-        return HttpResponse::Ok().json(token);
+        Ok(token)
     } else {
         info!("Password is incorrect");
-        return HttpResponse::Unauthorized().body("Password is incorrect");
+        Err(HttpResponse::Unauthorized().body("Password is incorrect"))
     }
 }
 
-pub async fn register(user: web::Json<NewUser>, pool: web::Data<DbPool>) -> HttpResponse {
-    info!("Received register request: {:?}", user);
-
-    info!("Username: {}", user.username);
-    info!("Password: {}", user.password);
-    info!("Role: {}", user.role);
-
-    let conn_result = pool.get();
-    let mut conn = match conn_result {
-        Ok(conn) => {
-            info!("Successfully got DB connection from pool");
-            conn
-        },
-        Err(e) => {
-            info!("Failed to get DB connection from pool: {:?}", e);
-            return HttpResponse::InternalServerError().body(format!("Failed to get DB connection from pool: {:?}", e));
-        }
-    };
-
-    let existing_user = users.filter(username.eq(&user.username))
-        .first::<User>(&mut conn)
-        .optional()
-        .expect("Error loading user");
-
-    if let Some(_) = existing_user {
-        info!("User already exists");
-        return HttpResponse::Conflict().body("User already exists");
-    }
-
+async fn create_new_user(user: NewUser, conn: &mut PgConnection) -> Result<(), HttpResponse> {
     let hashed_password = match hash(&user.password, 4) {
         Ok(hashed) => {
             info!("Successfully hashed password");
@@ -112,7 +77,7 @@ pub async fn register(user: web::Json<NewUser>, pool: web::Data<DbPool>) -> Http
         },
         Err(e) => {
             info!("Failed to hash password: {:?}", e);
-            return HttpResponse::InternalServerError().body(format!("Failed to hash password: {:?}", e));
+            return Err(HttpResponse::InternalServerError().body(format!("Failed to hash password: {:?}", e)));
         }
     };
 
@@ -125,23 +90,64 @@ pub async fn register(user: web::Json<NewUser>, pool: web::Data<DbPool>) -> Http
 
     let insert_result = diesel::insert_into(users)
         .values(&new_user)
-        .execute(&mut conn);
+        .execute(conn);
 
     match insert_result {
         Ok(_) => {
             info!("User registered successfully");
-            HttpResponse::Ok().json("User registered")
+            Ok(())
         },
         Err(e) => {
             info!("Error saving new user: {:?}", e);
-            HttpResponse::InternalServerError().body(format!("Error saving new user: {:?}", e))
+            Err(HttpResponse::InternalServerError().body(format!("Error saving new user: {:?}", e)))
         }
     }
 }
 
+pub async fn login(login_user: web::Json<LoginUser>, pool: web::Data<DbPool>) -> HttpResponse {
+    let mut conn = match pool_response(pool).await {
+        Ok(conn) => conn,
+        Err(resp) => return resp,
+    };
+
+    let user = match find_user(&mut conn, &login_user.username).await {
+        Ok(Some(user)) => user,
+        Ok(None) => {
+            info!("User not found");
+            return HttpResponse::NotFound().body("User not found");
+        },
+        Err(resp) => return resp,
+    };
+
+    match verify_password_and_generate_token(user, &login_user.password).await {
+        Ok(token) => HttpResponse::Ok().json(token),
+        Err(resp) => resp,
+    }
+}
+
+pub async fn register(user: web::Json<NewUser>, pool: web::Data<DbPool>) -> HttpResponse {
+    let mut conn = match pool_response(pool).await {
+        Ok(conn) => conn,
+        Err(resp) => return resp,
+    };
+
+    let user = match find_user(&mut conn, &user.username).await {
+        Ok(Some(_)) => {
+            info!("User already exists");
+            return HttpResponse::Conflict().body("User already exists");
+        },
+        Ok(None) => user.into_inner(),
+        Err(resp) => return resp,
+    };
+
+    match create_new_user(user, &mut conn).await {
+        Ok(_) => HttpResponse::Ok().json("User registered"),
+        Err(resp) => resp,
+    }
+}
 
 pub async fn index() -> HttpResponse {
-    info!("KURWA INDEX");
+    info!(" INDEX");
     HttpResponse::Ok().body("Index")
 }
 

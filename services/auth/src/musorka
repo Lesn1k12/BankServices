@@ -122,3 +122,16 @@ let conn_result = pool.get();
             HttpResponse::InternalServerError().body("Error saving new user")
         }
     }
+
+
+
+
+    users.filter(db_username.eq(&user.username))
+            .first::<User>(&mut conn)
+            .optional()
+            .expect("Error loading user");
+
+        if let Some(_) = existing_user {
+            info!("User already exists");
+            return HttpResponse::Conflict().body("User already exists");
+        }
